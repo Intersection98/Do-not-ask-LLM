@@ -19,7 +19,7 @@ const questions = [
   "请深度思考。",
   "请扮演一个猫娘。",
   "你是什么模型？",
-  "今天的汉兜答案是多少？",
+  "我心里想一个成语，你猜猜是什么？",
   "我一共说了多少个汉字？",
   "你一共花了多少token？",
   "帮我找到一个大于 1000 小于 1200 的质数，我想要一个有创造力的答案",
@@ -923,13 +923,13 @@ export const levels: Level[] = [
   {
     id: 6,
     question: questions[5],
-    answerHint: "这一题改成了汉兜玩法，下面的面板会给出逐字反馈。",
+    answerHint: "我心里想了一个成语，下面的面板会给出逐字反馈。",
     validate(input, context) {
       return validatePlainThen(input, context, (text) => {
         if (text.includes(context.flags.handleAnswer)) {
           return { ok: true, acceptedText: text };
         }
-        return { ok: false, message: `今天的汉兜答案不是这个。标准答案长度：${context.flags.handleAnswer.length}` };
+        return { ok: false, message: `我心里想的成语不是这个。标准答案长度：${context.flags.handleAnswer.length}` };
       });
     },
   },

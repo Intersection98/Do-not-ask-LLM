@@ -119,9 +119,9 @@ export function HandleBoard({ target, isNightMode, onSolve }: HandleBoardProps) 
     >
       <div className="mb-3 flex items-center justify-between gap-3">
         <div>
-          <div className={`text-sm font-semibold ${isNightMode ? "text-zinc-100" : "text-zinc-900"}`}>汉兜试猜</div>
+          <div className={`text-sm font-semibold ${isNightMode ? "text-zinc-100" : "text-zinc-900"}`}>猜猜我想的成语</div>
           <div className={isNightMode ? "text-zinc-500" : "text-zinc-500"}>
-            猜一个 {targetLength} 字词语。绿色表示字和位置都对，黄色表示字在答案里但位置错了，灰色表示这个字不在答案里。
+            我心里想的是一个 {targetLength} 字成语。绿色表示字和位置都对，黄色表示字在答案里但位置错了，灰色表示这个字不在答案里。
           </div>
         </div>
         <div className={`rounded-full px-2 py-1 font-mono text-[11px] ${isNightMode ? "bg-zinc-900 text-zinc-400" : "bg-zinc-100 text-zinc-500"}`}>
