@@ -923,7 +923,7 @@ export const levels: Level[] = [
   {
     id: 6,
     question: questions[5],
-    answerHint: "我心里想了一个成语，下面的面板会给出逐字反馈。",
+    answerHint: "我心里想了一个成语，下面会给你一个提示字，还会反馈逐字、声母和韵母。",
     validate(input, context) {
       return validatePlainThen(input, context, (text) => {
         if (text.includes(context.flags.handleAnswer)) {

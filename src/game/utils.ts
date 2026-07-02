@@ -1,10 +1,30 @@
+import { pinyin } from "pinyin-pro";
 import type { PermanentRule, ValidationContext } from "./types";
 
 export const HANDLE_ANSWER_KEY = "askless.handleAnswer";
+export const HANDLE_HINT_KEY = "askless.handleHint";
 export const SAVE_KEY = "askless.save.v2";
 export const HIDDEN_MODEL_NAME = "别问模型";
 
 export type HandleGuessCellState = "exact" | "present" | "absent";
+export type HandlePhoneticPiece = {
+  char: string;
+  pinyin: string;
+  initial: string;
+  final: string;
+};
+
+export type HandleGuessCellDetail = {
+  char: string;
+  pinyin: string;
+  initial: string;
+  final: string;
+  charState: HandleGuessCellState;
+  initialState: HandleGuessCellState;
+  finalState: HandleGuessCellState;
+};
+
+const handlePhoneticCache = new Map<string, HandlePhoneticPiece[]>();
 
 export function normalizeText(input: string) {
   return input.trim().replace(/\s+/g, " ");
@@ -130,33 +150,86 @@ export function getHandleAnswerFallback(now = new Date()) {
   return answers[daySeed % answers.length];
 }
 
+export function getHandleHintFallback(answer: string) {
+  return Array.from(answer.replace(/\s+/g, ""))[0] ?? "";
+}
+
 export function splitHandleWord(input: string) {
   return Array.from(input.replace(/\s+/g, ""));
+}
+
+function evaluateHandleParts(guessParts: string[], targetParts: string[]) {
+  const states = Array.from({ length: targetParts.length }, () => "absent" as HandleGuessCellState);
+  const remainingCounts = new Map<string, number>();
+
+  targetParts.forEach((part, index) => {
+    if (guessParts[index] === part) {
+      states[index] = "exact";
+      return;
+    }
+    remainingCounts.set(part, (remainingCounts.get(part) ?? 0) + 1);
+  });
+
+  guessParts.forEach((part, index) => {
+    if (states[index] === "exact") return;
+    const remaining = remainingCounts.get(part) ?? 0;
+    if (remaining <= 0) return;
+    states[index] = "present";
+    remainingCounts.set(part, remaining - 1);
+  });
+
+  return states;
+}
+
+export function getHandlePhoneticPieces(input: string): HandlePhoneticPiece[] {
+  const normalized = input.replace(/\s+/g, "");
+  if (handlePhoneticCache.has(normalized)) {
+    return handlePhoneticCache.get(normalized) ?? [];
+  }
+
+  const result = pinyin(normalized, { toneType: "none", type: "all" });
+  const pieces = Array.isArray(result)
+    ? result.map((item) => ({
+        char: item.origin,
+        pinyin: item.pinyin,
+        initial: item.initial || "",
+        final: item.final || "",
+      }))
+    : [];
+
+  handlePhoneticCache.set(normalized, pieces);
+  return pieces;
 }
 
 export function evaluateHandleGuess(guess: string, target: string): HandleGuessCellState[] {
   const guessChars = splitHandleWord(guess);
   const targetChars = splitHandleWord(target);
-  const states = Array.from({ length: targetChars.length }, () => "absent" as HandleGuessCellState);
-  const remainingCounts = new Map<string, number>();
+  return evaluateHandleParts(guessChars, targetChars);
+}
 
-  targetChars.forEach((char, index) => {
-    if (guessChars[index] === char) {
-      states[index] = "exact";
-      return;
-    }
-    remainingCounts.set(char, (remainingCounts.get(char) ?? 0) + 1);
-  });
+export function evaluateHandleGuessDetail(guess: string, target: string): HandleGuessCellDetail[] {
+  const guessChars = splitHandleWord(guess);
+  const guessPieces = getHandlePhoneticPieces(guess);
+  const targetPieces = getHandlePhoneticPieces(target);
+  const charStates = evaluateHandleParts(guessChars, splitHandleWord(target));
+  const initialStates = evaluateHandleParts(
+    guessPieces.map((piece) => piece.initial),
+    targetPieces.map((piece) => piece.initial),
+  );
+  const finalStates = evaluateHandleParts(
+    guessPieces.map((piece) => piece.final),
+    targetPieces.map((piece) => piece.final),
+  );
 
-  guessChars.forEach((char, index) => {
-    if (states[index] === "exact") return;
-    const remaining = remainingCounts.get(char) ?? 0;
-    if (remaining <= 0) return;
-    states[index] = "present";
-    remainingCounts.set(char, remaining - 1);
-  });
-
-  return states;
+  return guessChars.map((char, index) => ({
+    char,
+    pinyin: guessPieces[index]?.pinyin ?? "",
+    initial: guessPieces[index]?.initial ?? "",
+    final: guessPieces[index]?.final ?? "",
+    charState: charStates[index] ?? "absent",
+    initialState: initialStates[index] ?? "absent",
+    finalState: finalStates[index] ?? "absent",
+  }));
 }
 
 export function formatClock(date: Date) {

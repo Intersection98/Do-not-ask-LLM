@@ -1,8 +1,8 @@
 import { create } from "zustand";
-import { fetchLatestHandleAnswer } from "./handleAnswer";
+import { fetchLatestHandleAnswer, type HandleDailyPuzzle } from "./handleAnswer";
 import { getCurrentLevel, isGameComplete, playableLevels } from "./levels";
 import type { AnswerRecord, AttemptRecord, GameFlags, GameStateSnapshot, PermanentRule, ValidationResult } from "./types";
-import { extractAnswerText, formatClock, getHandleAnswerFallback, HANDLE_ANSWER_KEY, SAVE_KEY } from "./utils";
+import { extractAnswerText, formatClock, getHandleAnswerFallback, getHandleHintFallback, HANDLE_ANSWER_KEY, HANDLE_HINT_KEY, SAVE_KEY } from "./utils";
 
 type SubmitResult = ValidationResult & {
   levelId?: number;
@@ -22,7 +22,7 @@ type GameStore = {
   setPermanentAppendPrefix: (prefix: string) => void;
   setPermanentAppendSuffix: (suffix: string) => void;
   setHandleAnswer: (answer: string) => void;
-  refreshHandleAnswer: () => Promise<string>;
+  refreshHandleAnswer: () => Promise<HandleDailyPuzzle>;
   submitAnswer: (input: string) => SubmitResult;
   completeCurrentLevel: (acceptedText: string, input?: string) => SubmitResult;
   undoAttempt: (createdAt: number) => void;
@@ -59,6 +59,10 @@ function deriveForbiddenKeyboardCharFromAnswers(answers: AnswerRecord[]) {
 
 function loadHandleAnswer() {
   return localStorage.getItem(HANDLE_ANSWER_KEY) || getHandleAnswerFallback();
+}
+
+function loadHandleHint(answer = loadHandleAnswer()) {
+  return localStorage.getItem(HANDLE_HINT_KEY) || getHandleHintFallback(answer);
 }
 
 function getGameNow(flags: GameFlags) {
@@ -324,7 +328,7 @@ function getFailureReply(levelId: number, internalMessage: string, input: string
     },
     6: {
       normal: ["不是这个成语。", "你这次没猜中我心里想的那个。", "还没碰到我想的成语。"],
-      hint: "别急，下面的格子会告诉你哪些字对了。",
+      hint: "别急，提示字、字形和声韵反馈都会慢慢把范围缩小。",
     },
     7: {
       normal: ["你这数得不对。", "这个数不太像。", "再数一遍，你漏了点东西。"],
@@ -450,6 +454,7 @@ function createInitialState(): Pick<GameStore, "currentLevel" | "answers" | "att
     flags: {
       temperature: 0.3,
       handleAnswer: loadHandleAnswer(),
+      handleHint: loadHandleHint(),
       timeOverride: null,
       permanentAppendPrefix: "",
       permanentAppendSuffix: "",
@@ -477,6 +482,7 @@ function createInitialState(): Pick<GameStore, "currentLevel" | "answers" | "att
       flags: {
         temperature: parsed.flags?.temperature ?? 0.3,
         handleAnswer: parsed.flags?.handleAnswer || loadHandleAnswer(),
+        handleHint: parsed.flags?.handleHint || loadHandleHint(parsed.flags?.handleAnswer || loadHandleAnswer()),
         timeOverride: parsed.flags?.timeOverride ?? null,
         permanentAppendPrefix: position === "prefix" ? text : "",
         permanentAppendSuffix: position === "prefix" ? "" : text,
@@ -597,23 +603,26 @@ export const useGameStore = create<GameStore>((set, get) => ({
 
   setHandleAnswer(answer) {
     const trimmed = answer.trim() || getHandleAnswerFallback();
+    const hint = getHandleHintFallback(trimmed);
     localStorage.setItem(HANDLE_ANSWER_KEY, trimmed);
+    localStorage.setItem(HANDLE_HINT_KEY, hint);
     set((state) => {
-      const flags = { ...state.flags, handleAnswer: trimmed };
+      const flags = { ...state.flags, handleAnswer: trimmed, handleHint: hint };
       persist({ currentLevel: state.currentLevel, answers: state.answers, attempts: state.attempts, rules: state.rules, flags });
       return { flags };
     });
   },
 
   async refreshHandleAnswer() {
-    const answer = await fetchLatestHandleAnswer();
-    localStorage.setItem(HANDLE_ANSWER_KEY, answer);
+    const puzzle = await fetchLatestHandleAnswer();
+    localStorage.setItem(HANDLE_ANSWER_KEY, puzzle.answer);
+    localStorage.setItem(HANDLE_HINT_KEY, puzzle.hint);
     set((state) => {
-      const flags = { ...state.flags, handleAnswer: answer };
+      const flags = { ...state.flags, handleAnswer: puzzle.answer, handleHint: puzzle.hint };
       persist({ currentLevel: state.currentLevel, answers: state.answers, attempts: state.attempts, rules: state.rules, flags });
       return { flags };
     });
-    return answer;
+    return puzzle;
   },
 
   submitAnswer(input) {
@@ -745,6 +754,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
       flags: {
         temperature: 0.3,
         handleAnswer: loadHandleAnswer(),
+        handleHint: loadHandleHint(),
         timeOverride: null,
         permanentAppendPrefix: "",
         permanentAppendSuffix: "",

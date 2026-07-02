@@ -1,11 +1,12 @@
 import { ChangeEvent, CompositionEvent, KeyboardEvent, useEffect, useMemo, useState } from "react";
-import { evaluateHandleGuess, splitHandleWord } from "@/game/utils";
+import { evaluateHandleGuessDetail, splitHandleWord, type HandleGuessCellState } from "@/game/utils";
 
 const HANDLE_PUZZLE_STORAGE_PREFIX = "askless.handlePuzzle.";
 const HANDLE_PUZZLE_MAX_GUESSES = 6;
 
 type HandleBoardProps = {
   target: string;
+  hint: string;
   isNightMode: boolean;
   onSolve: (answer: string) => string | null;
 };
@@ -32,7 +33,20 @@ function loadStoredGuesses(target: string, targetLength: number) {
   }
 }
 
-export function HandleBoard({ target, isNightMode, onSolve }: HandleBoardProps) {
+function getCellStateClass(state: HandleGuessCellState | null, isNightMode: boolean) {
+  if (state === "exact") return "border-emerald-500 bg-emerald-500/15 text-emerald-500";
+  if (state === "present") return "border-amber-500 bg-amber-500/15 text-amber-500";
+  if (state === "absent") {
+    return isNightMode ? "border-zinc-800 bg-zinc-900 text-zinc-500" : "border-zinc-200 bg-zinc-100 text-zinc-500";
+  }
+  return isNightMode ? "border-zinc-800 bg-transparent text-zinc-700" : "border-zinc-200 bg-transparent text-zinc-300";
+}
+
+function formatPhoneticPiece(label: string, value: string) {
+  return `${label}${value || "无"}`;
+}
+
+export function HandleBoard({ target, hint, isNightMode, onSolve }: HandleBoardProps) {
   const targetChars = useMemo(() => splitHandleWord(target), [target]);
   const targetLength = targetChars.length;
   const [draft, setDraft] = useState("");
@@ -61,11 +75,15 @@ export function HandleBoard({ target, isNightMode, onSolve }: HandleBoardProps) 
     () =>
       Array.from({ length: HANDLE_PUZZLE_MAX_GUESSES }, (_, index) => {
         const guess = guesses[index] ?? "";
-        const cells = splitHandleWord(guess);
-        const states = guess ? evaluateHandleGuess(guess, target) : [];
+        const details = guess ? evaluateHandleGuessDetail(guess, target) : [];
         return Array.from({ length: targetLength }, (_, cellIndex) => ({
-          char: cells[cellIndex] ?? "",
-          state: states[cellIndex] ?? null,
+          char: details[cellIndex]?.char ?? "",
+          pinyin: details[cellIndex]?.pinyin ?? "",
+          initial: details[cellIndex]?.initial ?? "",
+          final: details[cellIndex]?.final ?? "",
+          charState: details[cellIndex]?.charState ?? null,
+          initialState: details[cellIndex]?.initialState ?? null,
+          finalState: details[cellIndex]?.finalState ?? null,
         }));
       }),
     [guesses, target, targetLength],
@@ -99,7 +117,7 @@ export function HandleBoard({ target, isNightMode, onSolve }: HandleBoardProps) 
     }
 
     if (nextGuesses.length >= HANDLE_PUZZLE_MAX_GUESSES) {
-      setMessage("还没猜中。颜色会提示你哪些字对了、哪些位置错了。");
+      setMessage("还没猜中。字形、声母和韵母都会继续给你反馈。");
       return;
     }
 
@@ -137,12 +155,19 @@ export function HandleBoard({ target, isNightMode, onSolve }: HandleBoardProps) 
         <div>
           <div className={`text-sm font-semibold ${isNightMode ? "text-zinc-100" : "text-zinc-900"}`}>猜猜我想的成语</div>
           <div className={isNightMode ? "text-zinc-500" : "text-zinc-500"}>
-            我心里想的是一个 {targetLength} 字成语。绿色表示字和位置都对，黄色表示字在答案里但位置错了，灰色表示这个字不在答案里。
+            我心里想的是一个 {targetLength} 字成语。大格子看字，小标签看声母和韵母；绿色表示位置也对，黄色表示存在但位置不对。
           </div>
         </div>
         <div className={`rounded-full px-2 py-1 font-mono text-[11px] ${isNightMode ? "bg-zinc-900 text-zinc-400" : "bg-zinc-100 text-zinc-500"}`}>
           剩余 {guessesLeft} / {HANDLE_PUZZLE_MAX_GUESSES}
         </div>
+      </div>
+
+      <div className={`mb-3 flex items-center justify-between gap-3 rounded-2xl px-3 py-2 text-sm ${isNightMode ? "bg-zinc-900 text-zinc-200" : "bg-zinc-50 text-zinc-700"}`}>
+        <span>提示字</span>
+        <span className={`rounded-full px-3 py-1 text-base font-semibold tracking-[0.12em] ${isNightMode ? "bg-zinc-800 text-zinc-100" : "bg-white text-zinc-900"}`}>
+          {hint}
+        </span>
       </div>
 
       <div className="mb-3 space-y-2">
@@ -153,25 +178,20 @@ export function HandleBoard({ target, isNightMode, onSolve }: HandleBoardProps) 
             style={{ gridTemplateColumns: `repeat(${targetLength}, minmax(0, 1fr))` }}
           >
             {row.map((cell, cellIndex) => {
-              const stateClass =
-                cell.state === "exact"
-                  ? "border-emerald-500 bg-emerald-500/15 text-emerald-500"
-                  : cell.state === "present"
-                    ? "border-amber-500 bg-amber-500/15 text-amber-500"
-                    : cell.state === "absent"
-                      ? isNightMode
-                        ? "border-zinc-800 bg-zinc-900 text-zinc-500"
-                        : "border-zinc-200 bg-zinc-100 text-zinc-500"
-                      : isNightMode
-                        ? "border-zinc-800 bg-transparent text-zinc-700"
-                        : "border-zinc-200 bg-transparent text-zinc-300";
-
               return (
                 <div
                   key={`handle-row-${rowIndex}-cell-${cellIndex}`}
-                  className={`flex h-12 items-center justify-center rounded-2xl border text-lg font-semibold tracking-[0.08em] transition ${stateClass}`}
+                  className={`flex min-h-20 flex-col items-center justify-center rounded-2xl border px-1 py-2 transition ${getCellStateClass(cell.charState, isNightMode)}`}
                 >
-                  {cell.char || " "}
+                  <div className="text-lg font-semibold tracking-[0.08em]">{cell.char || " "}</div>
+                  <div className="mt-1 flex flex-col gap-1 text-[10px] leading-none">
+                    <span className={`rounded-full border px-1.5 py-1 ${getCellStateClass(cell.initialState, isNightMode)}`}>
+                      {cell.char ? formatPhoneticPiece("声 ", cell.initial) : " "}
+                    </span>
+                    <span className={`rounded-full border px-1.5 py-1 ${getCellStateClass(cell.finalState, isNightMode)}`}>
+                      {cell.char ? formatPhoneticPiece("韵 ", cell.final) : " "}
+                    </span>
+                  </div>
                 </div>
               );
             })}
@@ -186,7 +206,7 @@ export function HandleBoard({ target, isNightMode, onSolve }: HandleBoardProps) 
               ? "border-zinc-800 text-zinc-100 placeholder:text-zinc-600 focus:border-zinc-600"
               : "border-zinc-200 text-zinc-900 placeholder:text-zinc-400 focus:border-zinc-400"
           }`}
-          placeholder={`输入 ${targetLength} 个字`}
+          placeholder={`输入 ${targetLength} 个字的成语`}
           value={draft}
           onChange={handleDraftChange}
           onCompositionStart={handleDraftCompositionStart}

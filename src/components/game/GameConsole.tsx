@@ -9,6 +9,7 @@ import { ToolSidebar } from "./ToolSidebar";
 type GameConsoleProps = {
   currentLevel: number;
   handleAnswer: string;
+  handleHint: string;
   answers: AnswerRecord[];
   attempts: AttemptRecord[];
   isNightMode: boolean;
@@ -23,7 +24,7 @@ type GameConsoleProps = {
   onPermanentAppendSuffixChange: (suffix: string) => void;
   onTemperatureChange: (temperature: number) => void;
   onTimeOverrideChange: (timeOverride: string | null) => void;
-  onRefreshHandleAnswer: () => Promise<string>;
+  onRefreshHandleAnswer: () => Promise<unknown>;
   onSubmit: (input: string) => ValidationResult;
   onCompleteLevel: (acceptedText: string, input?: string) => ValidationResult;
   onUndoAttempt: (createdAt: number) => void;
@@ -399,6 +400,7 @@ function pickBranchLinePuzzleReleaseCandidate(
 export function GameConsole({
   currentLevel,
   handleAnswer,
+  handleHint,
   answers,
   attempts,
   isNightMode,
@@ -2023,6 +2025,7 @@ export function GameConsole({
               {isHandleLevel && (
                 <HandleBoard
                   target={handleAnswer}
+                  hint={handleHint}
                   isNightMode={isNightMode}
                   onSolve={handleHandleBoardSolve}
                 />

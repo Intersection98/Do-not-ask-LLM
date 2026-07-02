@@ -4,6 +4,10 @@ const HANDLE_PROXY_BASE = "/handle-proxy";
 const HANDLE_START_DATE = new Date(2022, 0, 0);
 
 type HandleEntry = [string, string?];
+export type HandleDailyPuzzle = {
+  answer: string;
+  hint: string;
+};
 
 async function fetchText(path: string) {
   const response = await fetch(path, { cache: "no-store" });
@@ -66,7 +70,7 @@ function getHandleDay(date: Date) {
   return Math.floor((Number(normalizedDate) - Number(HANDLE_START_DATE)) / 86_400_000);
 }
 
-function pickAnswer(entries: HandleEntry[], day: number) {
+function pickAnswer(entries: HandleEntry[], day: number): HandleDailyPuzzle {
   const entry = day > entries.length ? entries[Math.floor(seedrandom(`day-${day}`)() * entries.length)] : entries[day];
   const answer = entry?.[0];
 
@@ -74,7 +78,10 @@ function pickAnswer(entries: HandleEntry[], day: number) {
     throw new Error("今天没有可用的汉兜答案。");
   }
 
-  return answer;
+  return {
+    answer,
+    hint: entry?.[1]?.trim() || Array.from(answer)[0] || "",
+  };
 }
 
 export async function fetchLatestHandleAnswer(date = new Date()) {

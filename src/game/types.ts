@@ -3,6 +3,7 @@ export type PermanentRule = "meowSuffix" | "refusalTone" | "jsonOnly" | "colorMa
 export type GameFlags = {
   temperature: number;
   handleAnswer: string;
+  handleHint: string;
   timeOverride: string | null;
   permanentAppendPrefix: string;
   permanentAppendSuffix: string;

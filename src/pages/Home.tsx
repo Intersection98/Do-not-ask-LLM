@@ -11,6 +11,7 @@ export default function Home() {
   const timeOverride = useGameStore((state) => state.flags.timeOverride);
   const isNightMode = useGameStore((state) => state.flags.isNightMode);
   const handleAnswer = useGameStore((state) => state.flags.handleAnswer);
+  const handleHint = useGameStore((state) => state.flags.handleHint);
   const permanentAppendPrefix = useGameStore((state) => state.flags.permanentAppendPrefix);
   const permanentAppendSuffix = useGameStore((state) => state.flags.permanentAppendSuffix);
   const refreshHandleAnswer = useGameStore((state) => state.refreshHandleAnswer);
@@ -105,6 +106,7 @@ export default function Home() {
       attempts={attempts}
       currentLevel={currentLevel}
       handleAnswer={handleAnswer}
+      handleHint={handleHint}
       isNightMode={isNightMode}
       permanentAppendPrefix={permanentAppendPrefix}
       permanentAppendSuffix={permanentAppendSuffix}
