@@ -1,4 +1,4 @@
-import { KeyboardEvent, useEffect, useMemo, useState } from "react";
+import { ChangeEvent, CompositionEvent, KeyboardEvent, useEffect, useMemo, useState } from "react";
 import { evaluateHandleGuess, splitHandleWord } from "@/game/utils";
 
 const HANDLE_PUZZLE_STORAGE_PREFIX = "askless.handlePuzzle.";
@@ -38,6 +38,7 @@ export function HandleBoard({ target, isNightMode, onSolve }: HandleBoardProps) 
   const [draft, setDraft] = useState("");
   const [guesses, setGuesses] = useState<string[]>(() => loadStoredGuesses(target, targetLength));
   const [message, setMessage] = useState<string | null>(null);
+  const [isComposing, setIsComposing] = useState(false);
   const solved = guesses.some((guess) => guess === target);
   const guessesLeft = Math.max(0, HANDLE_PUZZLE_MAX_GUESSES - guesses.length);
 
@@ -111,6 +112,21 @@ export function HandleBoard({ target, isNightMode, onSolve }: HandleBoardProps) 
     submitGuess();
   }
 
+  function handleDraftChange(event: ChangeEvent<HTMLInputElement>) {
+    const nextValue = event.target.value;
+    setDraft(isComposing ? nextValue : normalizeGuess(nextValue, targetLength));
+    setMessage(null);
+  }
+
+  function handleDraftCompositionStart(_event: CompositionEvent<HTMLInputElement>) {
+    setIsComposing(true);
+  }
+
+  function handleDraftCompositionEnd(event: CompositionEvent<HTMLInputElement>) {
+    setIsComposing(false);
+    setDraft(normalizeGuess(event.currentTarget.value, targetLength));
+  }
+
   return (
     <div
       className={`mb-2 rounded-2xl px-3 py-3 text-xs shadow-sm transition-[background-color,color,box-shadow] duration-500 ease-in-out ${
@@ -170,13 +186,11 @@ export function HandleBoard({ target, isNightMode, onSolve }: HandleBoardProps) 
               ? "border-zinc-800 text-zinc-100 placeholder:text-zinc-600 focus:border-zinc-600"
               : "border-zinc-200 text-zinc-900 placeholder:text-zinc-400 focus:border-zinc-400"
           }`}
-          maxLength={targetLength}
           placeholder={`输入 ${targetLength} 个字`}
           value={draft}
-          onChange={(event) => {
-            setDraft(normalizeGuess(event.target.value, targetLength));
-            setMessage(null);
-          }}
+          onChange={handleDraftChange}
+          onCompositionStart={handleDraftCompositionStart}
+          onCompositionEnd={handleDraftCompositionEnd}
           onKeyDown={handleDraftKeyDown}
         />
         <button
