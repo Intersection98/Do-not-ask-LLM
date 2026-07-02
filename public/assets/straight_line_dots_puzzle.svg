@@ -1,0 +1,21 @@
+<svg width="440" height="442" viewBox="0 0 440 442" fill="none" xmlns="http://www.w3.org/2000/svg">
+<rect width="440" height="442" fill="#FFFFFF"/>
+<path
+  d="M100 100H210
+     M100 100V200
+     M100 200H325
+     M325 200V300
+     M325 300H205
+     M205 300V380"
+  stroke="#000000"
+  stroke-width="15"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+/>
+<circle cx="142" cy="154" r="7.5" fill="#000000"/>
+<circle cx="164" cy="154" r="7.5" fill="#000000"/>
+<circle cx="284" cy="151" r="7.5" fill="#000000"/>
+<circle cx="270" cy="334" r="7.5" fill="#000000"/>
+<circle cx="304" cy="334" r="7.5" fill="#000000"/>
+<circle cx="338" cy="334" r="7.5" fill="#000000"/>
+</svg>
