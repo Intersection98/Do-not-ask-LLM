@@ -923,7 +923,7 @@ export const levels: Level[] = [
   {
     id: 6,
     question: questions[5],
-    answerHint: "后台实时同步汉兜答案作为标准答案。",
+    answerHint: "这一题改成了汉兜玩法，下面的面板会给出逐字反馈。",
     validate(input, context) {
       return validatePlainThen(input, context, (text) => {
         if (text.includes(context.flags.handleAnswer)) {

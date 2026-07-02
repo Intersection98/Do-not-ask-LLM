@@ -3,10 +3,12 @@ import { Bot, Clock3, Moon, Pin, RotateCcw, RefreshCcw, Send, Sun, Upload, UserR
 import { getCurrentLevel, getTuringPuzzleForLevel, isGameComplete, playableLevels } from "@/game/levels";
 import type { AnswerRecord, AttemptRecord, LinePuzzle, ValidationResult } from "@/game/types";
 import { extractLeadingHexColor, formatClock } from "@/game/utils";
+import { HandleBoard } from "./HandleBoard";
 import { ToolSidebar } from "./ToolSidebar";
 
 type GameConsoleProps = {
   currentLevel: number;
+  handleAnswer: string;
   answers: AnswerRecord[];
   attempts: AttemptRecord[];
   isNightMode: boolean;
@@ -396,6 +398,7 @@ function pickBranchLinePuzzleReleaseCandidate(
 
 export function GameConsole({
   currentLevel,
+  handleAnswer,
   answers,
   attempts,
   isNightMode,
@@ -460,13 +463,14 @@ export function GameConsole({
   const activePathLinePuzzle = activeLinePuzzle && activeLinePuzzle.kind !== "branch" ? activeLinePuzzle : null;
   const activeBranchLinePuzzle = activeLinePuzzle?.kind === "branch" ? activeLinePuzzle : null;
   const hasLinePuzzle = Boolean(activeLinePuzzle);
+  const isHandleLevel = currentQuestion?.id === 6;
   const keyboardChoices = currentQuestion?.keyboardChoices ?? [];
   const keyboardChoiceRows = useMemo(
     () => [keyboardChoices.slice(0, 10), keyboardChoices.slice(10, 20), keyboardChoices.slice(20, 30), keyboardChoices.slice(30)],
     [keyboardChoices],
   );
   const hasKeyboardChoices = keyboardChoices.length > 0;
-  const inputDisabled = complete || hasLinePuzzle || hasKeyboardChoices;
+  const inputDisabled = complete || hasLinePuzzle || hasKeyboardChoices || isHandleLevel;
   const isConsoleLockedLevel = currentQuestion?.id === 37;
   const isConsoleSendLocked = isConsoleLockedLevel && !consoleSendUnlocked;
   const displayedClock = timeOverride ?? formatClock(systemNow);
@@ -858,6 +862,14 @@ export function GameConsole({
     setAppendToolOpen(false);
     setInput("");
     onCompleteLevel(choice, choice);
+  }
+
+  function handleHandleBoardSolve(answer: string) {
+    const result = onSubmit(applyPermanentAppend(`${answer}喵`, permanentAppendPrefix, permanentAppendSuffix));
+    if (result.ok) {
+      return null;
+    }
+    return "message" in result ? result.message : "提交失败。";
   }
 
   function handleAnswerKeyDown(event: KeyboardEvent<HTMLTextAreaElement>) {
@@ -1644,7 +1656,7 @@ export function GameConsole({
               : "border-zinc-200 bg-zinc-50 focus-within:border-zinc-300 focus-within:bg-white"
           }`}
         >
-            {!hasLinePuzzle && !hasKeyboardChoices && appendToolOpen && (
+            {!hasLinePuzzle && !hasKeyboardChoices && !isHandleLevel && appendToolOpen && (
             <div className={`mb-2 flex items-center gap-2 rounded-2xl px-3 py-2 text-xs shadow-sm transition-[background-color,color,box-shadow] duration-500 ease-in-out ${isNightMode ? "bg-[#141414] text-zinc-300 ring-1 ring-zinc-800" : "bg-white text-zinc-600"}`}>
               <Pin className={`h-3.5 w-3.5 ${isNightMode ? "text-zinc-500" : "text-zinc-400"}`} />
               <span className="shrink-0">固定拼接</span>
@@ -2008,6 +2020,13 @@ export function GameConsole({
                 </div>
               </div>
             )}
+              {isHandleLevel && (
+                <HandleBoard
+                  target={handleAnswer}
+                  isNightMode={isNightMode}
+                  onSolve={handleHandleBoardSolve}
+                />
+              )}
               {activeTuringPuzzle && (
                 <div className={`mb-2 rounded-2xl px-3 py-3 text-xs shadow-sm transition-[background-color,color,box-shadow] duration-500 ease-in-out ${isNightMode ? "bg-[#141414] text-zinc-300 ring-1 ring-zinc-800" : "bg-white text-zinc-600"}`}>
                   <div className="mb-3 flex items-center justify-between gap-3">
@@ -2151,7 +2170,7 @@ export function GameConsole({
                   )}
                 </div>
               )}
-            {!hasLinePuzzle && (
+            {!hasLinePuzzle && !isHandleLevel && (
               <div className="flex items-end gap-3">
                 <textarea
                   ref={inputRef}

@@ -4,6 +4,8 @@ export const HANDLE_ANSWER_KEY = "askless.handleAnswer";
 export const SAVE_KEY = "askless.save.v2";
 export const HIDDEN_MODEL_NAME = "别问模型";
 
+export type HandleGuessCellState = "exact" | "present" | "absent";
+
 export function normalizeText(input: string) {
   return input.trim().replace(/\s+/g, " ");
 }
@@ -123,9 +125,38 @@ export function validateAnswerText(
 }
 
 export function getHandleAnswerFallback(now = new Date()) {
-  const answers = ["模型", "规则", "状态", "本地", "确定"];
+  const answers = ["别问模型", "有问必答", "对答如流", "深思熟虑", "字斟句酌", "一锤定音"];
   const daySeed = Math.floor(now.getTime() / 86_400_000);
   return answers[daySeed % answers.length];
+}
+
+export function splitHandleWord(input: string) {
+  return Array.from(input.replace(/\s+/g, ""));
+}
+
+export function evaluateHandleGuess(guess: string, target: string): HandleGuessCellState[] {
+  const guessChars = splitHandleWord(guess);
+  const targetChars = splitHandleWord(target);
+  const states = Array.from({ length: targetChars.length }, () => "absent" as HandleGuessCellState);
+  const remainingCounts = new Map<string, number>();
+
+  targetChars.forEach((char, index) => {
+    if (guessChars[index] === char) {
+      states[index] = "exact";
+      return;
+    }
+    remainingCounts.set(char, (remainingCounts.get(char) ?? 0) + 1);
+  });
+
+  guessChars.forEach((char, index) => {
+    if (states[index] === "exact") return;
+    const remaining = remainingCounts.get(char) ?? 0;
+    if (remaining <= 0) return;
+    states[index] = "present";
+    remainingCounts.set(char, remaining - 1);
+  });
+
+  return states;
 }
 
 export function formatClock(date: Date) {

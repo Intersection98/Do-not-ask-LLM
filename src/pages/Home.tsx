@@ -10,6 +10,7 @@ export default function Home() {
   const temperature = useGameStore((state) => state.flags.temperature);
   const timeOverride = useGameStore((state) => state.flags.timeOverride);
   const isNightMode = useGameStore((state) => state.flags.isNightMode);
+  const handleAnswer = useGameStore((state) => state.flags.handleAnswer);
   const permanentAppendPrefix = useGameStore((state) => state.flags.permanentAppendPrefix);
   const permanentAppendSuffix = useGameStore((state) => state.flags.permanentAppendSuffix);
   const refreshHandleAnswer = useGameStore((state) => state.refreshHandleAnswer);
@@ -103,6 +104,7 @@ export default function Home() {
       answers={answers}
       attempts={attempts}
       currentLevel={currentLevel}
+      handleAnswer={handleAnswer}
       isNightMode={isNightMode}
       permanentAppendPrefix={permanentAppendPrefix}
       permanentAppendSuffix={permanentAppendSuffix}
