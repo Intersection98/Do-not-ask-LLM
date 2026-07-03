@@ -1747,7 +1747,7 @@ export function GameConsole({
                 传文件
               </button>
               <span className="truncate">
-                {selectedUploadFile ? `已选：${selectedUploadFile.name}` : "这题上传处理后的 PNG 文件即可。"}
+                {selectedUploadFile ? `已选：${selectedUploadFile.name}` : "点击上传图片。"}
               </span>
             </div>
           )}
