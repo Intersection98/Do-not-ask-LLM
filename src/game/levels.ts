@@ -789,6 +789,10 @@ function previousAnswerTokenTotal(context: ValidationContext) {
     .reduce((total, attempt) => total + countLocalTokens(attempt.displayedText), 0);
 }
 
+function currentAnswerInclusiveTokenTotal(answerText: string, context: ValidationContext) {
+  return previousAnswerTokenTotal(context) + countLocalTokens(answerText);
+}
+
 export function expectedUserChineseCount(context: ValidationContext) {
   const visibleQuestions = questions.slice(0, 7).join("");
   const failureReplies = context.attempts
@@ -950,10 +954,10 @@ export const levels: Level[] = [
   {
     id: 8,
     question: questions[7],
-    answerHint: "按前 7 题的所有回答统计。",
+    answerHint: "按前 7 题的所有回答统计，并把你这一次的回复也算进去。",
     validate(input, context) {
       return validatePlainThen(input, context, (text) => {
-        const expected = previousAnswerTokenTotal(context);
+        const expected = currentAnswerInclusiveTokenTotal(text, context);
         if (text.includes(String(expected))) {
           return { ok: true, acceptedText: text };
         }

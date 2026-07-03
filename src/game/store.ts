@@ -339,7 +339,7 @@ function getFailureReply(levelId: number, internalMessage: string, input: string
       hint: "只数汉字，别把数字和标点掺进去，而且我说过的话都算。",
     },
     8: {
-      normal: ["token 没算对。", "这个账你算漏了。", "不对，前面的消耗不止这些。"],
+      normal: ["token 没算对。", "这个账你算漏了。", "不对，前面的消耗不是这些。"],
       hint: "所有的token都要算哦。",
     },
     9: {
