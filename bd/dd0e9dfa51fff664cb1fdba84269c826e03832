@@ -1,0 +1,58 @@
+README.md
+  h_ece5df1ac3f71a 5-6 gitai:{"mixed_line_ranges":[{"Single":5}],"operations":[]}
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.2",
+  "base_commit_sha": "bddd0e9dfa51fff664cb1fdba84269c826e03832",
+  "prompts": {},
+  "humans": {
+    "h_ece5df1ac3f71a": {
+      "author": "yangqihui.mx <yangqihui.mx@bytedance.com>"
+    }
+  },
+  "attestation_metadata": {
+    "README.md": [
+      {
+        "hash": "h_ece5df1ac3f71a",
+        "line_ranges": [
+          {
+            "Range": [
+              5,
+              6
+            ]
+          }
+        ],
+        "mixed_line_ranges": [
+          {
+            "Single": 5
+          }
+        ],
+        "operations": []
+      }
+    ]
+  },
+  "remote_transcripts": {
+    "s_3257b2b04abf9a": {
+      "tool": "trae",
+      "conversation_id": "6a469d50ac4ff1067a099e3d",
+      "session_id": "6a469d50ac4ff1067a099e3d",
+      "status": "remote_only",
+      "message": "Remote transcript resolution is not implemented yet for TRAE prompts."
+    },
+    "s_3257b2b04abf9a::t_65f1df2d2ab7dc": {
+      "tool": "trae",
+      "conversation_id": "6a469d50ac4ff1067a099e3d",
+      "session_id": "6a469d50ac4ff1067a099e3d",
+      "status": "remote_only",
+      "message": "Remote transcript resolution is not implemented yet for TRAE prompts."
+    },
+    "s_3257b2b04abf9a::t_87b3ddaa97396b": {
+      "tool": "trae",
+      "conversation_id": "6a469d50ac4ff1067a099e3d",
+      "session_id": "6a469d50ac4ff1067a099e3d",
+      "status": "remote_only",
+      "message": "Remote transcript resolution is not implemented yet for TRAE prompts."
+    }
+  }
+}
