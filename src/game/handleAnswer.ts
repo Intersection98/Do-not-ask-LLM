@@ -1,94 +1,46 @@
-import seedrandom from "seedrandom";
-
-const HANDLE_PROXY_BASE = "/handle-proxy";
-const HANDLE_START_DATE = new Date(2022, 0, 0);
-
-type HandleEntry = [string, string?];
 export type HandleDailyPuzzle = {
   answer: string;
   hint: string;
 };
+const LOCAL_HANDLE_PUZZLES: readonly HandleDailyPuzzle[] = [
+  { answer: "物华天宝", hint: "华" },
+  { answer: "人杰地灵", hint: "杰" },
+  { answer: "俊采星驰", hint: "驰" },
+  { answer: "胜友如云", hint: "友" },
+  { answer: "高朋满座", hint: "朋" },
+  { answer: "腾蛟起凤", hint: "蛟" },
+  { answer: "钟鸣鼎食", hint: "鼎" },
+  { answer: "云销雨霁", hint: "霁" },
+  { answer: "逸兴遄飞", hint: "遄" },
+  { answer: "天高地迥", hint: "迥" },
+  { answer: "兴尽悲来", hint: "悲" },
+  { answer: "萍水相逢", hint: "萍" },
+  { answer: "时运不齐", hint: "运" },
+  { answer: "命途多舛", hint: "舛" },
+  { answer: "冯唐易老", hint: "冯" },
+  { answer: "李广难封", hint: "广" },
+  { answer: "达人知命", hint: "达" },
+  { answer: "老当益壮", hint: "益" },
+  { answer: "穷且益坚", hint: "坚" },
+  { answer: "青云之志", hint: "云" },
+  { answer: "北海虽赊", hint: "赊" },
+  { answer: "桑榆非晚", hint: "榆" },
+];
 
-async function fetchText(path: string) {
-  const response = await fetch(path, { cache: "no-store" });
-  if (!response.ok) {
-    throw new Error(`获取汉兜资源失败：${response.status}`);
+function pickRandomIndex(size: number) {
+  if (size <= 1) return 0;
+  if (typeof crypto !== "undefined" && typeof crypto.getRandomValues === "function") {
+    const values = new Uint32Array(1);
+    crypto.getRandomValues(values);
+    return values[0] % size;
   }
-  return response.text();
+  return Math.floor(Math.random() * size);
 }
 
-function getIndexScriptPath(html: string) {
-  const match = html.match(/<script[^>]+type=["']module["'][^>]+src=["']([^"']*\/assets\/index-[^"']+\.js)["']/);
-  if (!match?.[1]) {
-    throw new Error("没有找到汉兜主脚本。");
-  }
-  return match[1];
-}
-
-function shuffleWithSeed<T>(items: T[], seed = "handle") {
-  const random = seedrandom(seed);
-  let index = items.length;
-
-  while (index !== 0) {
-    const swapIndex = Math.floor(random() * index);
-    index -= 1;
-    [items[index], items[swapIndex]] = [items[swapIndex], items[index]];
-  }
-
-  return items;
-}
-
-function extractHandleEntries(script: string): HandleEntry[] {
-  const start = script.indexOf("const Cu=");
-  const end = script.indexOf(";function Ce", start);
-
-  if (start < 0 || end < 0) {
-    throw new Error("没有找到汉兜答案表。");
-  }
-
-  const declarations = script.slice(start, end);
-  const evaluateEntries = new Function(
-    "seededShuffle",
-    `
-      const en = "handle";
-      function T(items, seed = en) {
-        return seededShuffle(items, seed);
-      }
-      function j(_days, items) {
-        return items;
-      }
-      ${declarations};
-      return bt;
-    `,
-  ) as (seededShuffle: typeof shuffleWithSeed) => HandleEntry[];
-
-  return evaluateEntries(shuffleWithSeed);
-}
-
-function getHandleDay(date: Date) {
-  const normalizedDate = new Date(date.getFullYear(), date.getMonth(), date.getDate());
-  return Math.floor((Number(normalizedDate) - Number(HANDLE_START_DATE)) / 86_400_000);
-}
-
-function pickAnswer(entries: HandleEntry[], day: number): HandleDailyPuzzle {
-  const entry = day > entries.length ? entries[Math.floor(seedrandom(`day-${day}`)() * entries.length)] : entries[day];
-  const answer = entry?.[0];
-
-  if (!answer) {
-    throw new Error("今天没有可用的汉兜答案。");
-  }
-
-  return {
-    answer,
-    hint: entry?.[1]?.trim() || Array.from(answer)[0] || "",
-  };
-}
-
-export async function fetchLatestHandleAnswer(date = new Date()) {
-  const html = await fetchText(`${HANDLE_PROXY_BASE}/`);
-  const scriptPath = getIndexScriptPath(html);
-  const script = await fetchText(`${HANDLE_PROXY_BASE}${scriptPath}`);
-  const entries = extractHandleEntries(script);
-
-  return pickAnswer(entries, getHandleDay(date));
+export function pickRandomHandlePuzzle(previousAnswer?: string): HandleDailyPuzzle {
+  const candidates = previousAnswer
+    ? LOCAL_HANDLE_PUZZLES.filter((puzzle) => puzzle.answer !== previousAnswer)
+    : [...LOCAL_HANDLE_PUZZLES];
+  const pool = candidates.length > 0 ? candidates : [...LOCAL_HANDLE_PUZZLES];
+  return pool[pickRandomIndex(pool.length)];
 }

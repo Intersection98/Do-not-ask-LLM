@@ -1,8 +1,8 @@
 import { create } from "zustand";
-import { fetchLatestHandleAnswer, type HandleDailyPuzzle } from "./handleAnswer";
+import { pickRandomHandlePuzzle, type HandleDailyPuzzle } from "./handleAnswer";
 import { getCurrentLevel, isGameComplete, playableLevels } from "./levels";
 import type { AnswerRecord, AttemptRecord, GameFlags, GameStateSnapshot, PermanentRule, ValidationResult } from "./types";
-import { extractAnswerText, formatClock, getHandleAnswerFallback, getHandleHintFallback, HANDLE_ANSWER_KEY, HANDLE_HINT_KEY, SAVE_KEY } from "./utils";
+import { extractAnswerText, formatClock, getHandleHintFallback, HANDLE_ANSWER_KEY, HANDLE_HINT_KEY, SAVE_KEY } from "./utils";
 
 type SubmitResult = ValidationResult & {
   levelId?: number;
@@ -57,12 +57,16 @@ function deriveForbiddenKeyboardCharFromAnswers(answers: AnswerRecord[]) {
   return value ? value : null;
 }
 
-function loadHandleAnswer() {
-  return localStorage.getItem(HANDLE_ANSWER_KEY) || getHandleAnswerFallback();
-}
+function loadHandlePuzzle(): HandleDailyPuzzle {
+  const savedAnswer = localStorage.getItem(HANDLE_ANSWER_KEY);
+  if (!savedAnswer) {
+    return pickRandomHandlePuzzle();
+  }
 
-function loadHandleHint(answer = loadHandleAnswer()) {
-  return localStorage.getItem(HANDLE_HINT_KEY) || getHandleHintFallback(answer);
+  return {
+    answer: savedAnswer,
+    hint: localStorage.getItem(HANDLE_HINT_KEY) || getHandleHintFallback(savedAnswer),
+  };
 }
 
 function getGameNow(flags: GameFlags) {
@@ -446,6 +450,7 @@ function getFailureReply(levelId: number, internalMessage: string, input: string
 
 function createInitialState(): Pick<GameStore, "currentLevel" | "answers" | "attempts" | "rules" | "flags" | "lastResult"> {
   const saved = localStorage.getItem(SAVE_KEY);
+  const initialHandlePuzzle = loadHandlePuzzle();
   const fallback: ReturnType<typeof createInitialState> = {
     currentLevel: 0,
     answers: [],
@@ -453,8 +458,8 @@ function createInitialState(): Pick<GameStore, "currentLevel" | "answers" | "att
     rules: [],
     flags: {
       temperature: 0.3,
-      handleAnswer: loadHandleAnswer(),
-      handleHint: loadHandleHint(),
+      handleAnswer: initialHandlePuzzle.answer,
+      handleHint: initialHandlePuzzle.hint,
       timeOverride: null,
       permanentAppendPrefix: "",
       permanentAppendSuffix: "",
@@ -481,8 +486,8 @@ function createInitialState(): Pick<GameStore, "currentLevel" | "answers" | "att
       rules: migrateRules(parsed.rules ?? [], answers),
       flags: {
         temperature: parsed.flags?.temperature ?? 0.3,
-        handleAnswer: parsed.flags?.handleAnswer || loadHandleAnswer(),
-        handleHint: parsed.flags?.handleHint || loadHandleHint(parsed.flags?.handleAnswer || loadHandleAnswer()),
+        handleAnswer: parsed.flags?.handleAnswer || initialHandlePuzzle.answer,
+        handleHint: parsed.flags?.handleHint || getHandleHintFallback(parsed.flags?.handleAnswer || initialHandlePuzzle.answer),
         timeOverride: parsed.flags?.timeOverride ?? null,
         permanentAppendPrefix: position === "prefix" ? text : "",
         permanentAppendSuffix: position === "prefix" ? "" : text,
@@ -602,7 +607,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
   },
 
   setHandleAnswer(answer) {
-    const trimmed = answer.trim() || getHandleAnswerFallback();
+    const trimmed = answer.trim() || pickRandomHandlePuzzle().answer;
     const hint = getHandleHintFallback(trimmed);
     localStorage.setItem(HANDLE_ANSWER_KEY, trimmed);
     localStorage.setItem(HANDLE_HINT_KEY, hint);
@@ -614,7 +619,8 @@ export const useGameStore = create<GameStore>((set, get) => ({
   },
 
   async refreshHandleAnswer() {
-    const puzzle = await fetchLatestHandleAnswer();
+    const previousAnswer = get().flags.handleAnswer;
+    const puzzle = pickRandomHandlePuzzle(previousAnswer);
     localStorage.setItem(HANDLE_ANSWER_KEY, puzzle.answer);
     localStorage.setItem(HANDLE_HINT_KEY, puzzle.hint);
     set((state) => {
@@ -745,7 +751,10 @@ export const useGameStore = create<GameStore>((set, get) => ({
 
   resetGame() {
     const isNightMode = get().flags.isNightMode;
+    const handlePuzzle = pickRandomHandlePuzzle(get().flags.handleAnswer);
     localStorage.removeItem(SAVE_KEY);
+    localStorage.setItem(HANDLE_ANSWER_KEY, handlePuzzle.answer);
+    localStorage.setItem(HANDLE_HINT_KEY, handlePuzzle.hint);
     set({
       currentLevel: 0,
       answers: [],
@@ -753,8 +762,8 @@ export const useGameStore = create<GameStore>((set, get) => ({
       rules: [],
       flags: {
         temperature: 0.3,
-        handleAnswer: loadHandleAnswer(),
-        handleHint: loadHandleHint(),
+        handleAnswer: handlePuzzle.answer,
+        handleHint: handlePuzzle.hint,
         timeOverride: null,
         permanentAppendPrefix: "",
         permanentAppendSuffix: "",

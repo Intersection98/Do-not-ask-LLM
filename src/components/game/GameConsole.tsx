@@ -651,19 +651,20 @@ export function GameConsole({
   }, [linePuzzleManualToggleNodeIndices]);
 
   useEffect(() => {
+    if (!isHandleLevel) return;
+
     let active = true;
 
-    onRefreshHandleAnswer()
-      .catch(() => {
-        if (active) {
-          // 保留现有本地答案作为兜底，不在界面暴露同步状态。
-        }
-      });
+    onRefreshHandleAnswer().catch(() => {
+      if (active) {
+        // 本地随机题库理论上不会失败，这里保留兜底。
+      }
+    });
 
     return () => {
       active = false;
     };
-  }, [onRefreshHandleAnswer]);
+  }, [isHandleLevel, onRefreshHandleAnswer]);
 
   useEffect(() => {
     const timer = window.setInterval(() => {
