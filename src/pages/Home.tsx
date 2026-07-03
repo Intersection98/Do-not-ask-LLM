@@ -42,7 +42,7 @@ export default function Home() {
             <div className="border-b border-zinc-200/70 px-8 py-10 md:border-b-0 md:border-r">
               <div className="inline-flex items-center gap-2 rounded-full border border-zinc-200 bg-white/80 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.24em] text-zinc-500">
                 <span className="h-2 w-2 rounded-full bg-emerald-500" />
-                Puzzle Interface
+                puzzle game
               </div>
 
               <div className="mt-6 flex h-16 w-16 items-center justify-center rounded-full bg-zinc-900 text-white shadow-[0_18px_40px_rgba(15,23,42,0.22)]">
