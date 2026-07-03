@@ -1,0 +1,66 @@
+src/components/game/GameConsole.tsx
+  s_3257b2b04abf9a::t_700379b1f0e108 632-633 gitai:{"mixed_line_ranges":[],"operations":[{"operation_id":"6a473471ac4ff1067a09a5a7","tool_type":"agent","tool_id":"apply_patch","line_ranges":[{"Range":[632,633]}]}]}
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.2",
+  "base_commit_sha": "855899ddabc203d8600bf9526ac37139583193b6",
+  "prompts": {},
+  "sessions": {
+    "s_3257b2b04abf9a": {
+      "agent_id": {
+        "tool": "trae",
+        "id": "6a469d50ac4ff1067a099e3d",
+        "model": "gpt-5.4__dev"
+      },
+      "human_author": "yangqihui.mx <yangqihui.mx@bytedance.com>"
+    }
+  },
+  "attestation_metadata": {
+    "src/components/game/GameConsole.tsx": [
+      {
+        "hash": "s_3257b2b04abf9a::t_700379b1f0e108",
+        "line_ranges": [
+          {
+            "Range": [
+              632,
+              633
+            ]
+          }
+        ],
+        "mixed_line_ranges": [],
+        "operations": [
+          {
+            "operation_id": "6a473471ac4ff1067a09a5a7",
+            "tool_type": "agent",
+            "tool_id": "apply_patch",
+            "line_ranges": [
+              {
+                "Range": [
+                  632,
+                  633
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "remote_transcripts": {
+    "s_3257b2b04abf9a": {
+      "tool": "trae",
+      "conversation_id": "6a469d50ac4ff1067a099e3d",
+      "session_id": "6a469d50ac4ff1067a099e3d",
+      "status": "remote_only",
+      "message": "Remote transcript resolution is not implemented yet for TRAE prompts."
+    },
+    "s_3257b2b04abf9a::t_700379b1f0e108": {
+      "tool": "trae",
+      "conversation_id": "6a469d50ac4ff1067a099e3d",
+      "session_id": "6a469d50ac4ff1067a099e3d",
+      "status": "remote_only",
+      "message": "Remote transcript resolution is not implemented yet for TRAE prompts."
+    }
+  }
+}
