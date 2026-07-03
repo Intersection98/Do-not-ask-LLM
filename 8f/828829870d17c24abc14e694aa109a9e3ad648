@@ -1,0 +1,16 @@
+src/components/game/GameConsole.tsx
+  h_ece5df1ac3f71a 1756
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.2",
+  "base_commit_sha": "8f828829870d17c24abc14e694aa109a9e3ad648",
+  "prompts": {},
+  "humans": {
+    "h_ece5df1ac3f71a": {
+      "author": "yangqihui.mx <yangqihui.mx@bytedance.com>"
+    }
+  },
+  "attestation_metadata": {},
+  "remote_transcripts": {}
+}
