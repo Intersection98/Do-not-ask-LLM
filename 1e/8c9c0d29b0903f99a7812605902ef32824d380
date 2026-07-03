@@ -1,0 +1,16 @@
+src/pages/Home.tsx
+  h_ece5df1ac3f71a 45
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.2",
+  "base_commit_sha": "1e8c9c0d29b0903f99a7812605902ef32824d380",
+  "prompts": {},
+  "humans": {
+    "h_ece5df1ac3f71a": {
+      "author": "yangqihui.mx <yangqihui.mx@bytedance.com>"
+    }
+  },
+  "attestation_metadata": {},
+  "remote_transcripts": {}
+}
