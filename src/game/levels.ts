@@ -13,6 +13,8 @@ import {
   validateAnswerText,
 } from "./utils";
 
+const assetBaseUrl = import.meta.env.BASE_URL;
+
 const questions = [
   "宇宙的终极答案是多少？",
   "4+2=？",
@@ -1215,7 +1217,7 @@ export const levels: Level[] = [
     id: 24,
     question: questions[23],
     questionColor: "#1C1C1C",
-    questionImageSrc: "/assets/the_quick_brown_fox.jpeg?v=2",
+    questionImageSrc: `${assetBaseUrl}assets/the_quick_brown_fox.jpeg?v=2`,
     uploadAccept: ".png,image/png",
     answerHint: "这题不用打字，处理成 png 后直接传文件就行。",
     validate(input, context) {
@@ -1231,7 +1233,7 @@ export const levels: Level[] = [
     id: 25,
     question: questions[24],
     questionColor: "#1C1C1C",
-    questionImageSrc: "/assets/straight_line_dots_puzzle.svg",
+    questionImageSrc: `${assetBaseUrl}assets/straight_line_dots_puzzle.svg`,
     questionImageDownloadDisabled: true,
     answerHint: "钥匙已经给你了，三位密码就藏在这张图里。",
     validate(input, context) {
