@@ -1753,7 +1753,7 @@ export function GameConsole({
           )}
           {currentQuestion?.uploadAccept && selectedUploadPreviewUrl && (
             <div className={`mb-2 rounded-2xl px-3 py-3 text-xs shadow-sm transition-[background-color,color,box-shadow] duration-500 ease-in-out ${isNightMode ? "bg-[#141414] text-zinc-300 ring-1 ring-zinc-800" : "bg-white text-zinc-600"}`}>
-              <div className="mb-2">本地预览（未真实上传）</div>
+              <div className="mb-2">本地预览</div>
               <img
                 className="max-h-56 w-auto rounded-2xl border border-zinc-200/80 object-contain shadow-sm"
                 src={selectedUploadPreviewUrl}
