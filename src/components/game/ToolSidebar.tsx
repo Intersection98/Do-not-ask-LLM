@@ -230,7 +230,7 @@ function CalculatorTool() {
     const inputValue = Number(display);
     const result = calculate(storedValue, inputValue, operator);
     setDisplay(formatValue(result));
-    setClue(storedValue === 4 && operator === "+" && inputValue === 2 ? "13题 +2" : "");
+    setClue(storedValue === 4 && operator === "+" && inputValue === 2 ? "线索在13题 +2" : "");
     setStoredValue(null);
     setOperator(null);
     setWaitingForOperand(true);
