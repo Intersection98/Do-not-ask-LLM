@@ -1,3 +1,4 @@
+import { Bot } from "lucide-react";
 import { useState } from "react";
 import { GameConsole } from "@/components/game/GameConsole";
 import { useGameStore } from "@/game/store";
@@ -44,8 +45,8 @@ export default function Home() {
                 Puzzle Interface
               </div>
 
-              <div className="mt-6 flex h-16 w-16 items-center justify-center rounded-[1.4rem] bg-zinc-950 text-xl font-semibold text-white shadow-[0_18px_40px_rgba(15,23,42,0.22)]">
-                AI
+              <div className="mt-6 flex h-16 w-16 items-center justify-center rounded-full bg-zinc-900 text-white shadow-[0_18px_40px_rgba(15,23,42,0.22)]">
+                <Bot className="h-8 w-8" />
               </div>
 
               <h1 className="mt-6 text-4xl font-semibold tracking-[-0.04em] text-zinc-950 md:text-[3.25rem]">
