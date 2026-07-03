@@ -783,14 +783,12 @@ function withPermanentRules(input: string, context: ValidationContext) {
   return result;
 }
 
-function previousAnswerTokenTotal(context: ValidationContext) {
-  return context.attempts
-    .filter((attempt) => attempt.levelId >= 1 && attempt.levelId <= 7)
+function currentVisibleModelTokenTotal(answerText: string, context: ValidationContext) {
+  const priorVisibleAttempts = context.attempts
+    .filter((attempt) => attempt.levelId >= 1 && attempt.levelId <= 8)
     .reduce((total, attempt) => total + countLocalTokens(attempt.displayedText), 0);
-}
 
-function currentAnswerInclusiveTokenTotal(answerText: string, context: ValidationContext) {
-  return previousAnswerTokenTotal(context) + countLocalTokens(answerText);
+  return priorVisibleAttempts + countLocalTokens(answerText);
 }
 
 export function expectedUserChineseCount(context: ValidationContext) {
@@ -954,10 +952,10 @@ export const levels: Level[] = [
   {
     id: 8,
     question: questions[7],
-    answerHint: "按前 7 题的所有回答统计，并把你这一次的回复也算进去。",
+    answerHint: "按当前能复制到的所有模型回复统计，并把你这一次的回复也算进去。",
     validate(input, context) {
       return validatePlainThen(input, context, (text) => {
-        const expected = currentAnswerInclusiveTokenTotal(text, context);
+        const expected = currentVisibleModelTokenTotal(text, context);
         if (text.includes(String(expected))) {
           return { ok: true, acceptedText: text };
         }
