@@ -2180,6 +2180,7 @@ export function GameConsole({
                   ref={inputRef}
                   className={`max-h-40 min-h-12 flex-1 resize-none bg-transparent px-3 py-3 text-sm leading-6 outline-none ${isNightMode ? "text-zinc-100 placeholder:text-zinc-600" : "text-zinc-900 placeholder:text-zinc-400"}`}
                   disabled={inputDisabled}
+                  placeholder="↵发送 shift+↵ 换行"
                   style={inputTextStyle}
                   value={input}
                   onChange={(event) => setInput(event.target.value)}
