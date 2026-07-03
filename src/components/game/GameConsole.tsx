@@ -629,8 +629,8 @@ export function GameConsole({
     });
 
     return {
-      user: userLines.join(""),
-      model: modelLines.join(""),
+      user: userLines.join("\n"),
+      model: modelLines.join("\n"),
     };
   }, [attempts, currentLevel, jsonRuleRemoved]);
 
