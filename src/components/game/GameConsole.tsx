@@ -68,6 +68,7 @@ He maketh wars to cease unto the end of the earth; he breaketh the bow, and cutt
 Be still, and know that I am God: I will be exalted among the heathen, I will be exalted in the earth.
 
 The Lord of hosts is with us; the God of Jacob is our refuge. Selah.`;
+const LEVEL_37_CONSOLE_HINT = "去控制台找找看是谁不让你和我说话。";
 
 type ScreenPoint = {
   x: number;
@@ -798,6 +799,22 @@ export function GameConsole({
     }
     lockedSendAttemptRef.current = "";
   }, [isConsoleSendLocked, currentLevel]);
+
+  useEffect(() => {
+    if (!isConsoleSendLocked || currentQuestion?.id !== 37) return;
+
+    const latestLockedAttempt = [...attempts]
+      .reverse()
+      .find((attempt) => attempt.levelId === 37 && !attempt.ok);
+
+    if (latestLockedAttempt?.responseText !== LEVEL_37_CONSOLE_HINT) return;
+
+    if (lockedSendReplyIntervalRef.current) {
+      window.clearInterval(lockedSendReplyIntervalRef.current);
+      lockedSendReplyIntervalRef.current = null;
+    }
+    lockedSendAttemptRef.current = "";
+  }, [attempts, currentQuestion?.id, isConsoleSendLocked]);
 
   useEffect(
     () => () => {
